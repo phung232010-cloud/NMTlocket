@@ -597,22 +597,29 @@ def payos_webhook():
 @csrf_protect
 def api_inject():
     user = get_current_user()
+    if not user:
+        return jsonify({"success": False, "message": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."}), 401
+
     data = request.get_json(silent=True) or {}
     uid = (data.get("uid") or "").strip()
     if not uid:
-        return jsonify({"ok": False, "error": "Thiếu UID."}), 400
+        return jsonify({"success": False, "message": "Thiếu UID."}), 400
 
     # Validate UID
     ok, error = validate_uid(uid)
     if not ok:
-        return jsonify({"ok": False, "error": error}), 400
+        return jsonify({"success": False, "message": error}), 400
 
     # Trừ 1 credit trước
     ok, error = use_credit(user)
     if not ok:
-        return jsonify({"ok": False, "error": error}), 400
+        return jsonify({"success": False, "message": error or "Bạn không đủ lượt kích hoạt."}), 400
 
-    result = asyncio.run(inject_gold(uid, TOKEN_CONFIG))
+    try:
+        result = asyncio.run(inject_gold(uid, TOKEN_CONFIG))
+    except Exception as e:
+        refund_credit(user)
+        return jsonify({"success": False, "message": f"Lỗi hệ thống: {str(e)}"}), 500
 
     if result.get("success"):
         # Ghi nhận gold order

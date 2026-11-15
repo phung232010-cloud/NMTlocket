@@ -175,7 +175,7 @@ btnInject.addEventListener('click', async () => {
             showKeepGold();
             updateProgress(4);
         } else {
-            showResult(injectResult, 'error', `❌ ${data.message}`);
+            showResult(injectResult, 'error', `❌ ${data.message || data.error || 'Có lỗi xảy ra.'}`);
         }
     } catch (error) {
         showResult(injectResult, 'error', `❌ Lỗi: ${error.message}`);
