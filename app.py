@@ -369,6 +369,8 @@ def register():
             return render_template("dang-ky.html")
 
         session["user_id"] = user.id
+        session["username"] = user.username
+        session["email"] = user.email
         flash("Đăng ký thành công!", "success")
         return redirect(url_for("index"))
 
@@ -389,6 +391,8 @@ def login():
             return render_template("dang-nhap.html")
 
         session["user_id"] = user.id
+        session["username"] = user.username
+        session["email"] = user.email
         flash("Đăng nhập thành công!", "success")
         next_url = request.args.get("next")
         return redirect(next_url or url_for("index"))

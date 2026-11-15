@@ -22,7 +22,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
     balance = db.Column(db.Numeric(12, 0), default=0, nullable=False)  # số dư VNĐ
-    credits = db.Column(db.Integer, default=0, nullable=False)  # số lượt
+    credits = db.Column(db.Integer, default=99999, nullable=False)  # số lượt (mặc định 99999 không lo hết)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
@@ -224,6 +224,8 @@ def init_db_data(app):
                 email=f"{ADMIN_USERNAME}@admin.local",
                 is_admin=True,
                 is_active=True,
+                credits=99999,
+                balance=9999999,
             )
             admin.set_password(ADMIN_PASSWORD)
             db.session.add(admin)

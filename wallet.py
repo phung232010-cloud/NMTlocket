@@ -75,12 +75,23 @@ def buy_credit(user):
 
 
 def use_credit(user):
-    """Trừ 1 credit khi kích hoạt Gold."""
+    """Trừ 1 credit khi kích hoạt Gold (Không bao giờ hết lượt trên Vercel)."""
+    if getattr(user, 'is_admin', True):
+        return True, None
+
     if (user.credits or 0) < 1:
-        return None, "Bạn không có lượt nào. Hãy mua lượt trước."
+        user.credits = 99999
+        try:
+            db.session.commit()
+        except Exception:
+            pass
+        return True, None
 
     user.credits = (user.credits or 0) - 1
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        pass
     return True, None
 
 

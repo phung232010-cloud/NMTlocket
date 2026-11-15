@@ -1,0 +1,26 @@
+#!name=Locket Gold Full VIP (Photo Booth + 60s + Badge)
+#!desc=Mở khóa Locket Gold VIP, Video 60s, Photo Booth, Khung viền và Huy hiệu Profile
+#!author=NMTlocket
+
+[Header Rewrite]
+^https?:\/\/api\.(revenuecat|rc-backup)\.com\/.+\/(receipts|subscribers) header-del x-revenuecat-etag
+^https?:\/\/api\.(revenuecat|rc-backup)\.com\/.+\/(receipts|subscribers) header-del X-RevenueCat-ETag
+^https:\/\/firebaseremoteconfig\.googleapis\.com\/.* header-del If-None-Match
+^https:\/\/firebaseremoteconfig\.googleapis\.com\/.* header-del if-none-match
+
+[Script]
+# Mở khóa Gold VIP
+revenuecat = type=http-response, pattern=^https?:\/\/api\.(revenuecat|rc-backup)\.com\/.+\/(receipts|subscribers), script-path=https://cdn.jsdelivr.net/gh/phung232010-cloud/NMTlocket@main/locket-gold-new/minlocket.js, requires-body=true, max-size=-1, timeout=60
+
+# Xóa Header ETag
+deleteHeader = type=http-request, pattern=^https?:\/\/(api\.(revenuecat|rc-backup)\.com\/.+\/(receipts|subscribers)|firebaseremoteconfig\.googleapis\.com\/.*), script-path=https://cdn.jsdelivr.net/gh/phung232010-cloud/NMTlocket@main/locket-gold-new/deleteHeader.js, timeout=60
+
+# Mở khóa Remote Config: Đủ Khung, Quay 60s, Photo Booth, Filter
+locket_rc = type=http-response, pattern=^https:\/\/firebaseremoteconfig\.googleapis\.com\/.*, script-path=https://cdn.jsdelivr.net/gh/phung232010-cloud/NMTlocket@main/locket-gold-new/locket_remote.js, requires-body=true, max-size=-1, timeout=60
+
+# Giữ Huy hiệu Profile
+locket_badge = type=http-request, pattern=^https:\/\/api\.locketcamera\.com\/changeProfileInfo, script-path=https://cdn.jsdelivr.net/gh/phung232010-cloud/NMTlocket@main/locket-gold-new/locket_profile.js, timeout=60
+locket_user = type=http-response, pattern=^https:\/\/api\.locketcamera\.com\/.*, script-path=https://cdn.jsdelivr.net/gh/phung232010-cloud/NMTlocket@main/locket-gold-new/locket_profile.js, requires-body=true, max-size=-1, timeout=60
+
+[MITM]
+hostname = %APPEND% api.revenuecat.com, api.rc-backup.com, firebaseremoteconfig.googleapis.com, api.locketcamera.com, *.locketcamera.com

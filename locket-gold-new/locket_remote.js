@@ -31,11 +31,12 @@ var iOSCameraOptions = {
   var obj;
   try { obj = JSON.parse(inputBody); } catch (e) { obj = null; }
   if (!obj || typeof obj !== "object" || Array.isArray(obj)) {
-    $done({});
-  } else {
-  
-    obj.entries = obj.entries || {};
-    Object.assign(obj.entries, {
+    obj = {};
+  }
+  obj.state = "UPDATE";
+  obj.templateVersion = String(Date.now());
+  obj.entries = obj.entries || {};
+  Object.assign(obj.entries, {
       feature_gates: JSON.stringify({
         app_icon_picker: "enabled",
         camera_roll: "enabled",
@@ -52,6 +53,10 @@ var iOSCameraOptions = {
         streak_recovery: "enabled",
         photo_booth: "enabled",
         photos_booth: "enabled",
+        photobooth: "enabled",
+        photobooth_v2: "enabled",
+        camera_photo_booth: "enabled",
+        camera_photobooth: "enabled",
         filters: "enabled",
         filters_v2: "enabled",
         camera_effects: "enabled",
@@ -2447,4 +2452,3 @@ var iOSCameraOptions = {
       }])
     });
     $done({ body: JSON.stringify(obj) });
-  }
