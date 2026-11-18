@@ -780,6 +780,41 @@ def api_admin_update_user(user_id):
     return jsonify({"ok": True, "user": user.to_dict()})
 
 
+@app.route("/api/admin/set-credits", methods=["POST"])
+@admin_required
+def api_admin_set_credits():
+    current_u = get_current_user()
+    data = request.get_json(silent=True) or {}
+    target_uname = (data.get("username") or "").strip()
+    credits_val = data.get("credits")
+
+    try:
+        credits_val = int(credits_val)
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "Số lượt không hợp lệ."}), 400
+
+    if target_uname:
+        target_user = User.query.filter_by(username=target_uname).first()
+        if not target_user:
+            return jsonify({"ok": False, "error": f"Không tìm thấy người dùng '{target_uname}'."}), 404
+    else:
+        target_user = current_u
+
+    target_user.credits = credits_val
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+    return jsonify({
+        "ok": True,
+        "message": f"Đã cập nhật thành công {credits_val} lượt cho '{target_user.username}'.",
+        "username": target_user.username,
+        "credits": target_user.credits
+    })
+
+
 @app.route("/api/admin/transactions", methods=["GET"])
 @admin_required
 def api_admin_transactions():
@@ -843,6 +878,32 @@ def download_mobileconfig():
         download_name="locketgold_novpn.mobileconfig",
         mimetype="application/x-apple-aspen-config",
     )
+
+
+@app.route("/download/locket.conf")
+@app.route("/locket.conf")
+def download_locket_conf():
+    """Tải file cấu hình Shadowrocket locket.conf tương tự locketmphong.conf
+    nhưng mang thương hiệu riêng và mở khóa Photobooth không giới hạn."""
+    filepath = os.path.join(HERE, "static", "locket_vip.conf")
+    if not os.path.exists(filepath):
+        abort(404)
+    return send_file(
+        filepath,
+        as_attachment=False,
+        download_name="locket_vip.conf",
+        mimetype="text/plain; charset=utf-8",
+    )
+
+
+@app.route("/download/locket_vip_engine.js")
+@app.route("/locket_vip_engine.js")
+def download_locket_engine():
+    """Phục vụ file script engine JS cho Shadowrocket."""
+    filepath = os.path.join(HERE, "static", "locket_vip_engine.js")
+    if not os.path.exists(filepath):
+        abort(404)
+    return send_file(filepath, mimetype="application/javascript; charset=utf-8")
 
 
 if __name__ == "__main__":
